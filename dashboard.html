@@ -13,7 +13,6 @@
 </head>
 <body class="bg-slate-50 min-h-screen pb-12">
 
-  
   <header class="bg-[#0f5132] text-white shadow-md sticky top-0 z-50">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div>
@@ -27,14 +26,12 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-4 mt-6 space-y-6">
-    
     <div id="loading" class="text-center py-12">
       <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-[#0f5132] border-t-transparent"></div>
       <p class="text-slate-500 mt-2 text-sm">กำลังโหลดข้อมูลจาก Google Sheets...</p>
     </div>
 
     <div id="dashboardContent" class="hidden space-y-6">
-      
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
           <p class="text-xs font-semibold text-slate-500">จำนวนผู้ป่วยทั้งหมด</p>
@@ -54,7 +51,6 @@
         </div>
       </div>
 
-      
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
           <h3 class="text-sm font-bold text-slate-700 mb-4">📊 สัดส่วนแผนการดูแล (Disposition)</h3>
@@ -89,16 +85,14 @@
               </tr>
             </thead>
             <tbody id="patientTableBody" class="divide-y text-slate-700">
-              </tbody>
+            </tbody>
           </table>
         </div>
       </div>
-
     </div>
   </main>
 
   <script>
-    // 🛑 ใส่ลิ้งก์ Web App URL ตัวเดิมที่ได้จาก Google Apps Script
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPUEe3cosd74j44CUtgEX4LAMA6543RvqxrIm63n_D16CZbOH_bp5NMMPaU2U8j1ttIw/exec";
 
     let chart1 = null;
@@ -106,20 +100,25 @@
     let cachedData = [];
 
     async function fetchDashboardData() {
-      if (SCRIPT_URL === "วาง_WEB_APP_URL_ของคุณที่นี่") {
-        alert("กรุณาใส่ Web App URL ในโค้ดหน้า HTML ก่อนใช้งานครับ");
-        return;
-      }
-      
       document.getElementById('loading').classList.remove('hidden');
       document.getElementById('dashboardContent').classList.add('hidden');
 
       try {
-        const response = await fetch(SCRIPT_URL);
-        const data = await response.json();
+        const response = await fetch(SCRIPT_URL, {
+          method: 'GET',
+          redirect: 'follow'
+        });
+        
+        let data = await response.json();
+        
+        // ป้องกัน Error: ตรวจสอบให้มั่นใจว่า data เป็น Array (ถ้าไม่ใช่ให้ใช้ Array ว่างแทน)
+        if (!Array.isArray(data)) {
+          console.warn("ข้อมูลที่ได้รับไม่ใช่ Array:", data);
+          data = [];
+        }
+
         cachedData = data;
         
-        // ประมวลผลและแสดงผลข้อมูล
         renderSummary(data);
         renderCharts(data);
         renderTable(data);
@@ -127,8 +126,11 @@
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('dashboardContent').classList.remove('hidden');
       } catch (error) {
-        console.error(error);
-        document.getElementById('loading').innerHTML = `<p class="text-red-500 text-sm font-semibold">เกิดข้อผิดพลาดในการโหลดข้อมูลภายนอก คาดว่าข้อมูลในชีตยังว่างอยู่หรือตั้งค่าสิทธิ์เข้าถึงไม่ถูกต้อง</p>`;
+        console.error("Fetch error:", error);
+        document.getElementById('loading').innerHTML = `
+          <div class="text-red-500 text-sm font-semibold bg-red-50 p-4 rounded-lg inline-block border border-red-200">
+            ❌ ไม่สามารถโหลดข้อมูลได้ หรือข้อมูลในชีตไม่ถูกต้อง
+          </div>`;
       }
     }
 
@@ -139,11 +141,13 @@
       let continueCount = 0;
       let alertCount = 0;
 
-      data.forEach(row => {
-        if (row["Triggers Alerted"] && row["Triggers Alerted"].trim() !== "") triggerCount++;
-        if (row["Disposition"] === "Continue current plan") continueCount++;
-        if (row["Disposition"] === "Notify physician" || row["Disposition"] === "Consider ICU review") alertCount++;
-      });
+      if (Array.isArray(data)) {
+        data.forEach(row => {
+          if (row["Triggers Alerted"] && String(row["Triggers Alerted"]).trim() !== "") triggerCount++;
+          if (row["Disposition"] === "Continue current plan") continueCount++;
+          if (row["Disposition"] === "Notify physician" || row["Disposition"] === "Consider ICU review") alertCount++;
+        });
+      }
 
       document.getElementById('totalTriggers').innerText = triggerCount;
       document.getElementById('totalContinue').innerText = continueCount;
@@ -154,26 +158,26 @@
       let dispTypes = { "Continue plan": 0, "Notify physician": 0, "ICU review": 0 };
       let triggerMap = {};
 
-      data.forEach(row => {
-        // นับผลลัพธ์ Disposition
-        if (row["Disposition"] === "Continue current plan") dispTypes["Continue plan"]++;
-        else if (row["Disposition"] === "Notify physician") dispTypes["Notify physician"]++;
-        else if (row["Disposition"] === "Consider ICU review") dispTypes["ICU review"]++;
+      if (Array.isArray(data)) {
+        data.forEach(row => {
+          if (row["Disposition"] === "Continue current plan") dispTypes["Continue plan"]++;
+          else if (row["Disposition"] === "Notify physician") dispTypes["Notify physician"]++;
+          else if (row["Disposition"] === "Consider ICU review") dispTypes["ICU review"]++;
 
-        // นับจำนวนความถี่ของแต่ละ Trigger
-        if (row["Triggers Alerted"] && row["Triggers Alerted"].trim() !== "") {
-          let items = row["Triggers Alerted"].split(", ");
-          items.forEach(item => {
-            triggerMap[item] = (triggerMap[item] || 0) + 1;
-          });
-        }
-      });
+          if (row["Triggers Alerted"] && String(row["Triggers Alerted"]).trim() !== "") {
+            let items = String(row["Triggers Alerted"]).split(", ");
+            items.forEach(item => {
+              if (item.trim() !== "") {
+                triggerMap[item] = (triggerMap[item] || 0) + 1;
+              }
+            });
+          }
+        });
+      }
 
-      // ล้างข้อมูลกราฟเก่าออกก่อนสร้างใหม่ป้องกันทับซ้อน
       if (chart1) chart1.destroy();
       if (chart2) chart2.destroy();
 
-      // กราฟวงกลม Disposition
       const ctx1 = document.getElementById('dispositionChart').getContext('2d');
       chart1 = new Chart(ctx1, {
         type: 'doughnut',
@@ -187,7 +191,6 @@
         options: { responsive: true, maintainAspectRatio: false }
       });
 
-      // กราฟแท่ง Trigger
       const ctx2 = document.getElementById('triggerChart').getContext('2d');
       chart2 = new Chart(ctx2, {
         type: 'bar',
@@ -211,9 +214,14 @@
       const tbody = document.getElementById('patientTableBody');
       tbody.innerHTML = "";
 
-      // เรียงจากข้อมูลล่าสุดขึ้นก่อน (พิจารณาจาก Timestamp)
-      data.reverse().forEach(row => {
-        let trgBadge = row["Triggers Alerted"] 
+      if (!Array.isArray(data) || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-400">ยังไม่มีข้อมูลการบันทึก</td></tr>`;
+        return;
+      }
+
+      // โคลน Array เพื่อไม่ให้กระทบกับข้อมูลต้นฉบับเวลา reverse
+      [...data].reverse().forEach(row => {
+        let trgBadge = row["Triggers Alerted"] && String(row["Triggers Alerted"]).trim() !== ""
           ? `<span class="bg-red-100 text-red-700 font-medium px-2 py-0.5 rounded text-[10px] inline-block max-w-[180px] truncate" title="${row["Triggers Alerted"]}">${row["Triggers Alerted"]}</span>`
           : `<span class="text-slate-400">-</span>`;
 
@@ -222,10 +230,13 @@
         if(row["Disposition"] === "Notify physician") dispColor = "bg-amber-50 text-amber-700 border border-amber-200";
         if(row["Disposition"] === "Consider ICU review") dispColor = "bg-red-50 text-red-700 border border-red-200";
 
+        let timestampStr = row["Timestamp"] ? String(row["Timestamp"]).split(' ') : ['-', ''];
+        let timeDisplay = timestampStr.length > 1 ? `${timestampStr[0]}<br>${timestampStr[1]}` : timestampStr[0];
+
         let tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition border-b";
         tr.innerHTML = `
-          <td class="p-3 text-slate-500 whitespace-nowrap">${row["Timestamp"] ? row["Timestamp"].split(' ')[0] + '<br>' + row["Timestamp"].split(' ')[1] : '-'}</td>
+          <td class="p-3 text-slate-500 whitespace-nowrap">${timeDisplay}</td>
           <td class="p-3 font-medium">
             <div class="text-slate-900">${row["Name"] || '-'}</div>
             <div class="text-slate-400 text-[11px]">HN: ${row["HN"] || '-'} | Ward: ${row["Ward"] || '-'} Bed: ${row["Bed"] || '-'}</div>
@@ -245,14 +256,13 @@
     function filterTable() {
       const searchVal = document.getElementById('searchInput').value.toLowerCase();
       const filtered = cachedData.filter(row => {
-        return (row["Name"] && row["Name"].toLowerCase().includes(searchVal)) ||
-               (row["HN"] && row["HN"].toLowerCase().includes(searchVal)) ||
-               (row["Ward"] && row["Ward"].toLowerCase().includes(searchVal));
+        return (row["Name"] && String(row["Name"]).toLowerCase().includes(searchVal)) ||
+               (row["HN"] && String(row["HN"]).toLowerCase().includes(searchVal)) ||
+               (row["Ward"] && String(row["Ward"]).toLowerCase().includes(searchVal));
       });
       renderTable(filtered);
     }
 
-    // เรียกโหลดข้อมูลเมื่อเปิดหน้าเว็บทันที
     window.onload = fetchDashboardData;
   </script>
 </body>

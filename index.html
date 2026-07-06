@@ -6,7 +6,6 @@
   <title>GOLDEN 48 SEPSIS ROUND</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
     body { font-family: 'Sarabun', sans-serif; }
@@ -35,15 +34,6 @@
         <h2 class="text-sm font-bold text-slate-700 border-b pb-2 mb-3 flex items-center gap-2">
           <span>👤</span> ข้อมูลผู้ป่วย (Patient Information)
         </h2>
-
-        <div class="bg-emerald-50 border border-emerald-300 p-3 rounded-xl mb-4 flex flex-col items-center justify-center text-center">
-  <p class="text-xs text-emerald-800 font-semibold mb-2">⚡ กรอกข้อมูลด่วนโดยไม่ต้องพิมพ์</p>
-  <label class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg shadow cursor-pointer flex items-center gap-2 transition active:scale-95 w-full justify-center">
-    <span>📷 ถ่ายรูปสติกเกอร์ผู้ป่วย (Auto-Fill)</span>
-    <input type="file" id="stickerInput" accept="image/*" capture="environment" class="hidden" onchange="extractTextFromSticker(this)">
-  </label>
-  <p id="ocrStatus" class="text-[11px] text-slate-500 mt-1.5 hidden"></p>
-</div>
         
         <div class="grid grid-cols-2 gap-3">
           <div class="col-span-2 sm:col-span-1">
@@ -232,63 +222,6 @@
         btn.disabled = false;
       }
     });
-
-    async function extractTextFromSticker(input) {
-  if (!input.files || input.files.length === 0) return;
-  
-  const file = input.files[0];
-  const statusEl = document.getElementById('ocrStatus');
-  
-  statusEl.innerText = "⏳ กำลังสแกนตัวหนังสือภาษาไทยและ HN... (รอสักครู่)";
-  statusEl.classList.remove('hidden', 'text-red-500');
-  statusEl.classList.add('text-emerald-700');
-
-  try {
-    // เรียกใช้ AI อ่านภาษาไทยและอังกฤษจากรูปภาพ
-    const worker = await Tesseract.createWorker('tha+eng');
-    const ret = await worker.recognize(file);
-    const text = ret.data.text;
-    await worker.terminate();
-
-    console.log("ข้อความที่อ่านได้:", text);
-
-    // 1. ดึงเลข HN (หาคำว่า HN ตามด้วยตัวเลข หรือหาตัวเลขติดกัน 7-9 หลัก)
-    const hnMatch = text.match(/HN#?\s*([0-9]{6,10})/i) || text.match(/([0-9]{7,9})/);
-    if (hnMatch) {
-      document.querySelector('input[name="hn"]').value = hnMatch[1];
-    }
-
-    // 2. ดึงชื่อ-นามสกุล (หาคำนำหน้า นาย/นาง/น.ส./ด.ช./ด.ญ. ตามด้วยชื่อและนามสกุล)
-    const nameMatch = text.match(/(นาย|นาง|น\.ส\.|ด\.ช\.|ด\.ญ\.)\s*([ก-๙]+\s+[ก-๙]+)/);
-    if (nameMatch) {
-      // เอาคำนำหน้า + ชื่อ + นามสกุล มาใส่ช่อง Name
-      document.querySelector('input[name="name"]').value = `${nameMatch[1]} ${nameMatch[2]}`.trim();
-    } else {
-      // ถ้าหาคำนำหน้าไม่เจอ ลองหาข้อความภาษาไทย 2 คำติดกัน
-      const thaiWords = text.match(/([ก-๙]{2,}\s+[ก-๙]{2,})/);
-      if (thaiWords) {
-        document.querySelector('input[name="name"]').value = thaiWords[1].trim();
-      }
-    }
-
-    statusEl.innerText = "✅ ดึงข้อมูลสำเร็จ! กรุณาตรวจสอบความถูกต้องก่อนบันทึก";
-    Swal.fire({
-      icon: 'success',
-      title: 'สแกนสำเร็จ!',
-      text: 'ระบบดึง HN และชื่อลงในช่องให้เรียบร้อยแล้วครับ',
-      timer: 1500,
-      showConfirmButton: false
-    });
-
-  } catch (error) {
-    console.error(error);
-    statusEl.innerText = "❌ ไม่สามารถอ่านข้อความจากภาพได้ ลองถ่ายให้ชัดเจนขึ้นครับ";
-    statusEl.classList.add('text-red-500');
-  } finally {
-    input.value = ""; // รีเซ็ต input ให้ถ่ายรูปใหม่ได้
-  }
-}
-    
   </script>
 </body>
 </html>

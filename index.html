@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GOLDEN 48 SEPSIS ROUND</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Sarabun', sans-serif; }
+    .custom-checkbox:checked + div { background-color: #0f5132; border-color: #0f5132; color: white; }
+    .trigger-checkbox:checked + div { background-color: #dc3545; border-color: #dc3545; color: white; }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen pb-12">
+
+  <header class="bg-[#0f5132] text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div>
+        <h1 class="text-lg font-bold tracking-wide">GOLDEN 48 SEPSIS ROUND</h1>
+        <p class="text-xs text-emerald-200">ติดตามผู้ป่วยย้ายจาก ICU → WARD ภายใน 48 ชั่วโมง</p>
+      </div>
+      <div class="bg-amber-500 text-slate-900 font-extrabold px-3 py-1 rounded-full text-xs shadow">
+        48 HRS
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 mt-4 space-y-4">
+    <form id="sepsisForm" class="space-y-4">
+
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <h2 class="text-sm font-bold text-slate-700 border-b pb-2 mb-3 flex items-center gap-2">
+          <span>👤</span> ข้อมูลผู้ป่วย (Patient Information)
+        </h2>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="col-span-2 sm:col-span-1">
+            <label class="text-xs font-semibold text-slate-600">ชื่อ-นามสกุล (Name)</label>
+            <input type="text" name="name" required class="w-full mt-1 p-2 bg-slate-50 border rounded-lg text-sm focus:ring-2 focus:ring-[#0f5132] outline-none">
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            <label class="text-xs font-semibold text-slate-600">HN</label>
+            <input type="text" name="hn" required class="w-full mt-1 p-2 bg-slate-50 border rounded-lg text-sm focus:ring-2 focus:ring-[#0f5132] outline-none">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-600">Ward</label>
+            <input type="text" name="ward" required class="w-full mt-1 p-2 bg-slate-50 border rounded-lg text-sm focus:ring-2 focus:ring-[#0f5132] outline-none">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-600">Bed</label>
+            <input type="text" name="bed" required class="w-full mt-1 p-2 bg-slate-50 border rounded-lg text-sm focus:ring-2 focus:ring-[#0f5132] outline-none">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-600">วันที่ย้ายจาก ICU</label>
+            <input type="date" name="icuDate" class="w-full mt-1 p-2 bg-slate-50 border rounded-lg text-sm focus:ring-2 focus:ring-[#0f5132] outline-none">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-600">เวลา</label>
+            <input type="time" name="icuTime" class="w-full mt-1 p-2 bg-slate-50 border rounded-lg text-sm focus:ring-2 focus:ring-[#0f5132] outline-none">
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-red-50 border-2 border-red-500 p-4 rounded-xl shadow-sm">
+        <h2 class="text-sm font-bold text-red-700 flex items-center gap-2 mb-2">
+          <span>🚨</span> TRIGGER : หากพบข้อใดข้อหนึ่ง ให้แจ้งแพทย์ทันที!
+        </h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+          <label class="cursor-pointer"><input type="checkbox" name="triggers" value="NEWS2 >= 5" class="hidden trigger-checkbox"><div class="p-2 border border-red-300 bg-white rounded-lg text-center font-medium transition">NEWS2 ≥ 5</div></label>
+          <label class="cursor-pointer"><input type="checkbox" name="triggers" value="SBP < 90 / MAP < 65" class="hidden trigger-checkbox"><div class="p-2 border border-red-300 bg-white rounded-lg text-center font-medium transition">SBP < 90 หรือ MAP < 65</div></label>
+          <label class="cursor-pointer"><input type="checkbox" name="triggers" value="RR > 25" class="hidden trigger-checkbox"><div class="p-2 border border-red-300 bg-white rounded-lg text-center font-medium transition">RR > 25 /min</div></label>
+          <label class="cursor-pointer"><input type="checkbox" name="triggers" value="SpO2 < 92%" class="hidden trigger-checkbox"><div class="p-2 border border-red-300 bg-white rounded-lg text-center font-medium transition">SpO2 < 92%</div></label>
+          <label class="cursor-pointer"><input type="checkbox" name="triggers" value="UO < 0.5" class="hidden trigger-checkbox"><div class="p-2 border border-red-300 bg-white rounded-lg text-center font-medium transition">UO < 0.5 mL/kg/hr</div></label>
+          <label class="cursor-pointer"><input type="checkbox" name="triggers" value="ซึมลง / สับสน" class="hidden trigger-checkbox"><div class="p-2 border border-red-300 bg-white rounded-lg text-center font-medium transition">ซึมลง / สับสน</div></label>
+          <label class="cursor-pointer col-span-2 sm:col-span-3"><input type="checkbox" name="triggers" value="Lactate สูงขึ้น / สงสัย septic shock" class="hidden trigger-checkbox"><div class="p-2 border border-red-300 bg-white rounded-lg text-center font-medium transition">Lactate สูงขึ้น หรือสงสัย septic shock</div></label>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <h3 class="text-sm font-bold text-[#0f5132] mb-2">1. CLINICAL STABILITY</h3>
+          <div class="space-y-2 text-xs">
+            <label class="block cursor-pointer"><input type="checkbox" name="clinical" value="NEWS2 <= 4" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">NEWS2 ≤ 4 หรือไม่ worsening</div></label>
+            <label class="block cursor-pointer"><input type="checkbox" name="clinical" value="BP stable" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">BP / MAP stable (ไม่เพิ่ม vasopressor)</div></label>
+            <label class="block cursor-pointer"><input type="checkbox" name="clinical" value="RR < 22" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">RR < 22 /min และ SpO2 เป้าหมาย</div></label>
+            <label class="block cursor-pointer"><input type="checkbox" name="clinical" value="UO >= 0.5" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">Urine output ≥ 0.5 mL/kg/hr</div></label>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <h3 class="text-sm font-bold text-[#0f5132] mb-2">2. INFECTION CONTROL</h3>
+          <div class="space-y-2 text-xs">
+            <label class="block cursor-pointer"><input type="checkbox" name="infection" value="Antibiotic ถูกต้องตรงเวลา" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">Antibiotic ถูกต้องและให้ตรงเวลา</div></label>
+            <label class="block cursor-pointer"><input type="checkbox" name="infection" value="Blood culture reviewed" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">Blood culture / ผลเพาะเชื้อ reviewed</div></label>
+            <label class="block cursor-pointer"><input type="checkbox" name="infection" value="Source control completed" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">Source control completed / plan ชัดเจน</div></label>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <h3 class="text-sm font-bold text-[#0f5132] mb-2">3. ORGAN FUNCTION</h3>
+          <div class="space-y-2 text-xs">
+            <label class="block cursor-pointer"><input type="checkbox" name="organ" value="Lactate improving" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">Lactate improving หรือไม่จำเป็นต้องติดตาม</div></label>
+            <label class="block cursor-pointer"><input type="checkbox" name="organ" value="Creatinine stable" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">Creatinine / Urine output stable</div></label>
+            <label class="block cursor-pointer"><input type="checkbox" name="organ" value="Mental status ปกติ" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">Mental status ปกติ (ไม่ซึมลง / สับสน)</div></label>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <h3 class="text-sm font-bold text-[#0f5132] mb-2">4. NURSING BUNDLE</h3>
+          <div class="space-y-2 text-xs">
+            <label class="block cursor-pointer"><input type="checkbox" name="nursing" value="Nutrition started" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">Nutrition started</div></label>
+            <label class="block cursor-pointer"><input type="checkbox" name="nursing" value="DVT prophylaxis" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">DVT prophylaxis</div></label>
+            <label class="block cursor-pointer"><input type="checkbox" name="nursing" value="Pressure injury prevention" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">Pressure injury prevention</div></label>
+            <label class="block cursor-pointer"><input type="checkbox" name="nursing" value="Early mobilization" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">Early mobilization</div></label>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <h3 class="text-sm font-bold text-[#0f5132] mb-2">5. DEVICE</h3>
+          <div class="space-y-2 text-xs">
+            <label class="block cursor-pointer"><input type="checkbox" name="device" value="อุปกรณ์ยังมีข้อบ่งชี้" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">Foley / Central line / Drain ยังมีข้อบ่งชี้</div></label>
+            <label class="block cursor-pointer"><input type="checkbox" name="device" value="พิจารณาถอดอุปกรณ์" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">พิจารณาถอดอุปกรณ์ที่ไม่จำเป็น</div></label>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+          <h3 class="text-sm font-bold text-[#0f5132] mb-2">6. DISPOSITION</h3>
+          <div class="space-y-2 text-xs">
+            <label class="block cursor-pointer"><input type="radio" name="disposition" value="Continue current plan" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">✅ Continue current plan</div></label>
+            <label class="block cursor-pointer"><input type="radio" name="disposition" value="Notify physician" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">⚠️ Notify physician</div></label>
+            <label class="block cursor-pointer"><input type="radio" name="disposition" value="Consider ICU review" class="hidden custom-checkbox"><div class="p-2.5 border rounded-lg bg-slate-50 transition">🚨 Consider ICU review</div></label>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label class="text-xs font-semibold text-slate-600">Visited by</label>
+            <input type="text" name="visitedBy" required class="w-full mt-1 p-2 bg-slate-50 border rounded-lg text-sm outline-none">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-600">Team</label>
+            <input type="text" name="team" value="PCT MED" class="w-full mt-1 p-2 bg-slate-50 border rounded-lg text-sm outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-600">Note / Plan</label>
+          <textarea name="note" rows="2" class="w-full mt-1 p-2 bg-slate-50 border rounded-lg text-sm outline-none"></textarea>
+        </div>
+      </div>
+
+      <button type="submit" id="submitBtn" class="w-full bg-[#0f5132] hover:bg-emerald-800 text-white font-bold py-3.5 rounded-xl shadow-lg transition active:scale-95 flex justify-center items-center gap-2 text-base">
+        <span>💾</span> บันทึกข้อมูลการตรวจ (Save Data)
+      </button>
+
+    </form>
+  </main>
+
+  <script>
+    // 🛑 ให้นำ Web App URL ที่ได้จาก Google Apps Script มาวางที่นี่
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPUEe3cosd74j44CUtgEX4LAMA6543RvqxrIm63n_D16CZbOH_bp5NMMPaU2U8j1ttIw/exec";
+
+    document.getElementById('sepsisForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (SCRIPT_URL === "วาง_WEB_APP_URL_ของคุณที่นี่") {
+        Swal.fire("แจ้งเตือน", "กรุณานำ Web App URL จาก Google Apps Script มาใส่ในโค้ดก่อนใช้งานครับ", "warning");
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '⌛ กำลังบันทึกข้อมูล...';
+      btn.disabled = true;
+
+      // ดึงข้อมูลจากฟอร์ม
+      const formData = new FormData(this);
+      const data = {
+        name: formData.get('name'),
+        hn: formData.get('hn'),
+        ward: formData.get('ward'),
+        bed: formData.get('bed'),
+        icuDate: formData.get('icuDate'),
+        icuTime: formData.get('icuTime'),
+        disposition: formData.get('disposition') || "",
+        visitedBy: formData.get('visitedBy'),
+        team: formData.get('team'),
+        note: formData.get('note'),
+        clinical: formData.getAll('clinical'),
+        infection: formData.getAll('infection'),
+        organ: formData.getAll('organ'),
+        nursing: formData.getAll('nursing'),
+        device: formData.getAll('device'),
+        triggers: formData.getAll('triggers')
+      };
+
+      try {
+        // ใช้ fetch ร่วมกับ mode 'no-cors' เพื่อไม่ให้ติด CORS Block บน GitHub Pages
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        Swal.fire({
+          icon: 'success',
+          title: 'บันทึกสำเร็จ!',
+          text: 'ข้อมูลถูกส่งเข้า Google Sheets เรียบร้อยแล้ว',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        this.reset();
+      } catch (error) {
+        Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่', 'error');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
